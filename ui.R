@@ -14,6 +14,14 @@ shinyUI(fluidPage(
       fileInput('file', 'Choose the file containing your sample data:',
 	accept=c('text/csv', 'text/comma-separated-values,text/plain','.csv')
 	),                
+	
+      sliderInput(
+	"confLevel",
+        "Confidence level:",
+        min = 1,
+        max = 100,
+        value = 95
+      ),	
       
       tags$hr(),      
       h4("Data format"),
