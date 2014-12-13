@@ -1,7 +1,7 @@
 owANOVA
 ========================
 
-A simple web application implemented with R and Shiny to perform one way ANOVA with didactical purposes, allowing students to see all the ANOVA required calculations.
+A simple web application implemented with R and Shiny to perform one way and repeated measures ANOVA with didactical purposes, allowing students to see all the ANOVA required calculations.
 
 Requirements
 ------------
