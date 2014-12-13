@@ -1,7 +1,7 @@
 library(shiny)
 
 shinyUI(fluidPage(
-  titlePanel("Wellcome to owANOVA!"),
+  titlePanel("Welcome to owANOVA!"),
 
   # Sidebar with a controls panel and a main panel with output
   sidebarLayout(
