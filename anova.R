@@ -26,6 +26,7 @@ getN <- function(f){
 owAnovaResult <- setClass("owAnovaResult", 
 	representation(
 		F="numeric",
+		pValue="numeric",
 		
 		intraSC="numeric",
 		intraDF="numeric",
@@ -42,6 +43,10 @@ owAnovaResult <- setClass("owAnovaResult",
 
 getF <- function(f){
   attributes(f)$F
+}
+
+getPValue <- function(f){
+  attributes(f)$pValue
 }
 
 getIntraSC <- function(f){
@@ -130,9 +135,11 @@ owAnova <- function(data){
   MCintra = SCintra / intraDF
 
   F = MCinter / MCintra
+  pValue 	<- 1-pf(F, interDF, intraDF)
    
   owAnovaResult(
     F=F,
+    pValue=pValue,
     
     intraSC=SCintra,
     intraDF=intraDF,

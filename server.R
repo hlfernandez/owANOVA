@@ -22,7 +22,9 @@ shinyServer(function(input, output) {
     
     data 	<- loadDataset()
     result 	<- owAnova(data)
+    
     F 		<- getF(result)
+    pValue 	<- getPValue(result)
     SCintra 	<- getIntraSC(result)
     intraDF 	<- getIntraDF(result)
     MCintra 	<- getIntraMC(result)
@@ -34,13 +36,13 @@ shinyServer(function(input, output) {
     
     confLevel 	<- (input$confLevel / 100)
     QF		<- qf(confLevel, interDF, intraDF)
-    pValue 	<- 1-pf(F, interDF, intraDF)
+    
     if (F > QF) {
-      testResult 	<- "Reject H<sub>0</sub> and accept H<sub>1</sub>";
+      testResult 	<- "Reject H<sub>0</sub> and accept H<sub>1</sub> because:";
       explanation1 	<- paste("F (",round(F,4),") > F<sub>",confLevel,",",interDF,",",intraDF,"</sub> (",round(QF,4),").",sep="")
       explanation2 	<- paste("p (",round(pValue,4),") < &alpha; (",round(1-confLevel,2),").",sep="")
     } else {
-      testResult 	<- "Can't reject H<sub>0</sub>";
+      testResult 	<- "Can't reject H<sub>0</sub> because:";
       explanation1 	<- paste("F (",round(F,4),") < F<sub>",confLevel,",",interDF,",",intraDF,"</sub> (",round(QF,4),").",sep="")
       explanation2 	<- paste("p (",round(pValue,4),") > &alpha; (",round(1-confLevel,2),").",sep="")
     }
