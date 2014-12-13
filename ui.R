@@ -6,10 +6,16 @@ shinyUI(fluidPage(
   # Sidebar with a controls panel and a main panel with output
   sidebarLayout(
     sidebarPanel(    
-      h4("One-way analysis of variance"),
+      h4("One-way analysis of variance"),      
       a(
-	"http://en.wikipedia.org/wiki/One-way_analysis_of_variance",
+	"One-way ANOVA (independent samples)",
 	href="http://en.wikipedia.org/wiki/One-way_analysis_of_variance",
+	target="_blank"
+      ),
+      tags$br(),
+      a(
+	"Repeated measures ANOVA (correlated samples)",
+	href="https://statistics.laerd.com/statistical-guides/repeated-measures-anova-statistical-guide.php",
 	target="_blank"
       ),
       tags$hr(),      
@@ -25,7 +31,8 @@ shinyUI(fluidPage(
         min = 1,
         max = 100,
         value = 95
-      ),	
+      ),
+      checkboxInput("repeatedMeasures", "Repeated measures", value = FALSE),
       
       tags$hr(),      
       h4("Data format"),

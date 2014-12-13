@@ -142,8 +142,6 @@ setMethod("show", "scheffeComparison",
   }
 )
 
-na <- 111111111111111
-
 computeFactors <- function(data) {
   anovaFactors = vector()  
 
