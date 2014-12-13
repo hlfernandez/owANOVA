@@ -7,7 +7,11 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(    
       h4("One-way analysis of variance"),
-      a("http://en.wikipedia.org/wiki/One-way_analysis_of_variance"),
+      a(
+	"http://en.wikipedia.org/wiki/One-way_analysis_of_variance",
+	href="http://en.wikipedia.org/wiki/One-way_analysis_of_variance",
+	target="_blank"
+      ),
       tags$hr(),      
       
       h3("Input data"),
