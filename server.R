@@ -42,9 +42,20 @@ shinyServer(function(input, output) {
       explanation1 	<- paste("F (",round(F,4),") > F<sub>",confLevel,",",interDF,",",intraDF,"</sub> (",round(QF,4),").",sep="")
       explanation2 	<- paste("p (",round(pValue,4),") < &alpha; (",round(1-confLevel,2),").",sep="")
     } else {
-      testResult 	<- "Can't reject H<sub>0</sub> because:";
+      testResult 	<- "Can't reject H<sub>0</sub> because:	";
       explanation1 	<- paste("F (",round(F,4),") < F<sub>",confLevel,",",interDF,",",intraDF,"</sub> (",round(QF,4),").",sep="")
       explanation2 	<- paste("p (",round(pValue,4),") > &alpha; (",round(1-confLevel,2),").",sep="")
+    }
+    
+    if(getPValue(result) < (1-confLevel)) {
+      scheffeResult <- scheffe(result, confLevel)
+      scheffeText <- "<h5>Scheffé's pairwise comparisons:</h5><ul>";
+      for (i in 1:length(scheffeResult)){
+	scheffeText <- paste(scheffeText,"<li>", scheffeResultToString(scheffeResult[[i]]),"</li>",sep="")
+      }
+      scheffeText <- paste(scheffeText,"</ul>",sep="")
+    } else {
+      scheffeText <- ""
     }
     
     HTML(
@@ -60,7 +71,8 @@ shinyServer(function(input, output) {
       "</tr></table>",
       "<h5>",testResult,"</h5><ul>",
       "<li>",explanation1,"</li>",
-      "<li>",explanation2,"</li></ul>"
+      "<li>",explanation2,"</li></ul>",
+      scheffeText
    )
   })
   
