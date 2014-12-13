@@ -65,7 +65,7 @@ shinyServer(function(input, output) {
   output$downloadSample2 <- downloadHandler(
     filename = function() { "sampleData.csv" },
     content = function(file) {
-      write.table(read.csv("data/testData.csv",header=FALSE), file, col.names=FALSE, row.names=FALSE, quote=FALSE);
+      write.csv(read.csv("data/testData.csv"), file, row.names=FALSE, quote=FALSE);
     }
   )  
 })
