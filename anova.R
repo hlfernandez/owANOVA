@@ -142,12 +142,14 @@ setMethod("show", "scheffeComparison",
   }
 )
 
-omputeFactors <- function(data) {
+na <- 111111111111111
+
+computeFactors <- function(data) {
   anovaFactors = vector()  
 
   for (i in 1:ncol(data) ) {
     factor <- data[,i]
-    factor <- factor[factor != 0]
+    factor <- factor[!is.na(factor)]
     
     factorName		= colnames(data)[i]
     factorSum 		= sum(factor)
@@ -162,8 +164,6 @@ omputeFactors <- function(data) {
 }
 
 owAnova <- function(data){  
-  data[is.na(data)] <- 0
-
   anovaFactors <- computeFactors(data)
 
   T = 0
@@ -193,7 +193,6 @@ owAnova <- function(data){
 
   interDF = length(anovaFactors) - 1
   MCinter = SCinter / interDF
-
   intraDF = N - length(anovaFactors)
   MCintra = SCintra / intraDF
 
