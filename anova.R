@@ -55,13 +55,12 @@ setMethod("show", "owAnovaResult",
     SCtotal 	<- result@totalSC
     totalDF 	<- result@totalDF
     
-    cat("S.C.\tDF\tM.C.\tF\n")
-    cat(paste(round(SCinter,3),round(interDF,3),paste(round(MCinter,3)," (p = ",round(pValue,4),")",sep=""),"\n",sep="\t"))
-    cat(paste(round(SCintra,3),round(intraDF,3),round(MCintra,3),"\n",sep="\t"))
-    cat(paste(round(SCtotal,3),round(totalDF,3),"\n",sep="\t"))   
+    cat("S.V\tS.C.\tDF\tM.C.\tF\n")
+    cat(paste("Inter",round(SCinter,3),round(interDF,3),round(MCinter,3),paste(round(F,3)," (p = ",round(pValue,4),")",sep=""),"\n",sep="\t"))
+    cat(paste("Intra",round(SCintra,3),round(intraDF,3),round(MCintra,3),"\n",sep="\t"))
+    cat(paste("Total",round(SCtotal,3),round(totalDF,3),"\n",sep="\t"))   
   }
 )
-
 
 scheffeComparison <- setClass("scheffeComparison", 
 	representation(
@@ -71,7 +70,7 @@ scheffeComparison <- setClass("scheffeComparison",
 		meanDifference="numeric"
 )); 
 
-owRepeaedAnovaResult <- setClass("owRepeaedAnovaResult",
+owRepeatedAnovaResult <- setClass("owRepeatedAnovaResult",
 	representation(
 		aF="numeric",
 		apValue="numeric",
@@ -95,6 +94,38 @@ owRepeaedAnovaResult <- setClass("owRepeaedAnovaResult",
 		DFtotal="numeric"
 ));
 
+setMethod("show", "owRepeatedAnovaResult",
+  function(object){
+    result 	<- object
+    
+    aF 		<- result@aF
+    apValue 	<- result@apValue
+    
+    sF 		<- result@sF
+    spValue 	<- result@spValue
+    
+    SCa	<- result@SCa
+    DFa	<- result@DFa
+    MCa	<- result@MCa
+    
+    SCs	<- result@SCs
+    DFs	<- result@DFs
+    MCs	<- result@MCs
+    
+    SCas <- result@SCas
+    DFas <- result@DFas
+    MCas <- result@MCas
+    
+    SCtotal <- result@SCtotal
+    DFtotal <- result@DFtotal
+      
+    cat("S.C.\tDF\tM.C.\tF\n")
+    cat(paste("Factor (A)"	,round(SCa,3),round(DFa,3),round(MCa,3),paste(round(aF,3)," (p = ",round(apValue,4),")",sep=""),"\n",sep="\t"))
+    cat(paste("Subject (S)"	,round(SCs,3),round(DFs,3),round(MCs,3),paste(round(sF,3)," (p = ",round(spValue,4),")",sep=""),"\n",sep="\t"))
+    cat(paste("Error (AxS)"	,round(SCas,3),round(DFas,3),round(MCas,3),"\n",sep="\t"))
+    cat(paste("Total"		,round(SCtotal,3),round(DFtotal,3),"\n",sep="\t"))       
+  }
+)
 
 scheffeResultToString <- function(object) {
   factorA 		<- object@a
@@ -270,28 +301,28 @@ owRepeatedAnova <- function(data){
   S	<- S/a
 
   
-  SCa	<- A-T
-  DFa	<- a-1
-  MCa	<- SCa / DFa
+  SCa <- A-T
+  DFa <- a-1
+  MCa <- SCa / DFa
   
-  SCs	<- S-T
-  DFs	<- s-1
-  MCs	<- SCs / DFs
+  SCs <- S-T
+  DFs <- s-1
+  MCs <- SCs / DFs
   
-  SCas	<- AS - A - S + T
-  DFas	<- a*s - a - s + 1
-  MCas	<- SCas / DFas
+  SCas <- AS - A - S + T
+  DFas <- a*s - a - s + 1
+  MCas <- SCas / DFas
   
-  SCtotal	<- AS - T
-  DFtotal	<- a*s - 1
+  SCtotal <- AS - T
+  DFtotal <- a*s - 1
 
-  aF = MCa / MCas
+  aF 		<- MCa / MCas
   apValue 	<- 1-pf(aF, DFa, DFas)
 
-  sF = MCs / MCas
+  sF 		<- MCs / MCas
   spValue 	<- 1-pf(sF, DFs, DFas)
    
-  owRepeaedAnovaResult(
+  owRepeatedAnovaResult(
     aF=aF,
     apValue=apValue,
     
