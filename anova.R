@@ -41,6 +41,27 @@ owAnovaResult <- setClass("owAnovaResult",
 		factors="list"
 )); 
 
+setMethod("show", "owAnovaResult",
+  function(object){
+    result	<- object
+    F 		<- result@F
+    pValue 	<- result@pValue
+    SCintra 	<- result@intraSC
+    intraDF 	<- result@intraDF
+    MCintra 	<- result@intraMC
+    SCinter 	<- result@interSC
+    interDF 	<- result@interDF
+    MCinter 	<- result@interMC
+    SCtotal 	<- result@totalSC
+    totalDF 	<- result@totalDF
+    
+    cat("S.C.\tDF\tM.C.\tF\n")
+    cat(paste(round(SCinter,3),round(interDF,3),paste(round(MCinter,3)," (p = ",round(pValue,4),")",sep=""),"\n",sep="\t"))
+    cat(paste(round(SCintra,3),round(intraDF,3),round(MCintra,3),"\n",sep="\t"))
+    cat(paste(round(SCtotal,3),round(totalDF,3),"\n",sep="\t"))   
+  }
+)
+
 
 scheffeComparison <- setClass("scheffeComparison", 
 	representation(
