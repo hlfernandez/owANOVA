@@ -1,46 +1,47 @@
+# Represents an ANOVA factor.
 anovaFactor <- setClass("anovaFactor", 
-	representation(
-		name="character",
-		a="numeric",
-		aSquared="numeric",
-		n="numeric",
-		mean="numeric"
+  representation(
+    name="character",	# Factor name
+    a="numeric", 	# Sum of observations
+    aSquared="numeric",	# Sum of observations squared
+    n="numeric",	# Number of observations
+    mean="numeric"	# Mean of observations (a/n)
 )); 
 
+# Set show method for anovaFactor.
 setMethod("show", "anovaFactor",
   function(object){
     cat("[Factor ",object@name, "] A =", object@a,", A^2 = ",object@aSquared,", n = ",object@n,")","\n");
   }
 )
 
+# Represents an ANOVA subject. In this case it is stored the same information
+# that in an anovaFactor, so it simply extends this class.
 anovaSubject <- setClass("anovaSubject", 
-	representation(
-		name="character",
-		a="numeric",
-		aSquared="numeric",
-		n="numeric",
-		mean="numeric"
-));
+  contains = "anovaFactor"
+);
 
+# Stores the results of a one-way ANOVA.
 owAnovaResult <- setClass("owAnovaResult", 
-	representation(
-		F="numeric",
-		pValue="numeric",
-		
-		intraSC="numeric",
-		intraDF="numeric",
-		intraMC="numeric",
-		
-		interSC="numeric",
-		interDF="numeric",
-		interMC="numeric",
-		
-		totalSC="numeric",
-		totalDF="numeric",
-		
-		factors="list"
+  representation(
+    F="numeric",
+    pValue="numeric",
+
+    intraSC="numeric",
+    intraDF="numeric",
+    intraMC="numeric",
+
+    interSC="numeric",
+    interDF="numeric",
+    interMC="numeric",
+
+    totalSC="numeric",
+    totalDF="numeric",	
+    
+    factors="list"
 )); 
 
+# Set show method for owAnovaResult.
 setMethod("show", "owAnovaResult",
   function(object){
     result	<- object
@@ -62,38 +63,41 @@ setMethod("show", "owAnovaResult",
   }
 )
 
+# Stores the results of the Scheffé pairwise comparisons.
 scheffeComparison <- setClass("scheffeComparison", 
-	representation(
-		a="anovaFactor",
-		b="anovaFactor",
-		CR="numeric",
-		meanDifference="numeric"
+  representation(
+    a="anovaFactor",
+    b="anovaFactor",
+    CR="numeric",
+    meanDifference="numeric"
 )); 
 
+# Stores the results of a repeated measures ANOVA.
 owRepeatedAnovaResult <- setClass("owRepeatedAnovaResult",
-	representation(
-		aF="numeric",
-		apValue="numeric",
-		
-		sF="numeric",
-		spValue="numeric",
-		
-		SCa="numeric",
-		DFa="numeric",
-		MCa="numeric",
-		
-		SCs="numeric",
-		DFs="numeric",
-		MCs="numeric",
+  representation(
+    aF="numeric",
+    apValue="numeric",
 
-		SCas="numeric",
-		DFas="numeric",
-		MCas="numeric",
-		
-		SCtotal="numeric",
-		DFtotal="numeric"
+    sF="numeric",
+    spValue="numeric",
+    
+    SCa="numeric",
+    DFa="numeric",
+    MCa="numeric",
+    
+    SCs="numeric",
+    DFs="numeric",
+    MCs="numeric",
+
+    SCas="numeric",
+    DFas="numeric",
+    MCas="numeric",
+
+    SCtotal="numeric",
+    DFtotal="numeric"
 ));
 
+# Set show method for owRepeatedAnovaResult.
 setMethod("show", "owRepeatedAnovaResult",
   function(object){
     result 	<- object
@@ -127,6 +131,7 @@ setMethod("show", "owRepeatedAnovaResult",
   }
 )
 
+# Converts an object of scheffeComparison class into a string.
 scheffeResultToString <- function(object) {
   factorA 		<- object@a
   factorB 		<- object@b
@@ -141,7 +146,12 @@ scheffeResultToString <- function(object) {
   } else {
     comparison 	<- " < ";
   }
-  paste("|mean(",factorA@name,") - mean(",factorB@name,")| = ","|",factorA@mean," - ",factorB@mean,"| = ",round(meanDifference,4),comparison," CR (",round(CR,4),") ",differences,sep="")
+  paste(
+    "|mean(",factorA@name,") - mean(",factorB@name,")| = ",
+    "|",factorA@mean," - ",factorB@mean,"| = ",
+    round(meanDifference,4),comparison,
+    " CR (",round(CR,4),") ",
+    differences,sep="")
 }
 
 setMethod("show", "scheffeComparison",
@@ -150,6 +160,9 @@ setMethod("show", "scheffeComparison",
   }
 )
 
+# Iterates over data.frame data to compute each factor measures. Each column 
+# of data is a factor and the header its name.
+# Return: an a list of anovaFactor objects.
 computeFactors <- function(data) {
   anovaFactors = vector()  
 
@@ -169,6 +182,9 @@ computeFactors <- function(data) {
   anovaFactors
 }
 
+# Computes one-way ANOVA for data.frame data. Each column of data is a factor 
+# and the header its name.
+# Return: an object of class owAnovaResult.
 owAnova <- function(data){  
   anovaFactors <- computeFactors(data)
 
@@ -224,6 +240,9 @@ owAnova <- function(data){
   )
 }
 
+# Perform the pairwise comparisons for the factors contained in a given
+# anovaResult at the confidence level specified by confLevel.
+# Return: an scheffeComparison object.
 scheffe <- function(anovaResult, confLevel) {
   comparisons	<- vector()
   anovaFactors 	<- anovaResult@factors
@@ -246,6 +265,9 @@ scheffe <- function(anovaResult, confLevel) {
   comparisons
 }
 
+# Computes repeated measures ANOVA for data.frame data. Each column of data is 
+# a factor and the header its name. Each row is a subject.
+# Return: an object of class owRepeatedAnovaResult.
 owRepeatedAnova <- function(data){  
 
   s = nrow(data)
