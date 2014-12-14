@@ -1,6 +1,5 @@
 library(shiny)
 source("anova.R")
-source("anovaRepeated.R")
 
 # Define server logic required to perform the analysis
 shinyServer(function(input, output) {
@@ -14,7 +13,7 @@ shinyServer(function(input, output) {
   loadDataset <- reactive({
     if (is.null(input$file)) {
       if(input$repeatedMeasures == FALSE){
-	return (read.csv("data/testData.csv"));
+	return (read.csv("data/testDataOneWay.csv"));
       } else {
 	return (read.csv("data/testDataRepeated.csv"));
       }
@@ -30,16 +29,16 @@ shinyServer(function(input, output) {
       data 	<- loadDataset()
       result 	<- owAnova(data)
       
-      F 	<- getF(result)
-      pValue 	<- getPValue(result)
-      SCintra 	<- getIntraSC(result)
-      intraDF 	<- getIntraDF(result)
-      MCintra 	<- getIntraMC(result)
-      SCinter 	<- getInterSC(result)
-      interDF 	<- getInterDF(result)
-      MCinter 	<- getInterMC(result)
-      SCtotal 	<- getTotalSC(result)
-      totalDF 	<- getTotalDF(result)
+      F 	<- result@F
+      pValue 	<- result@pValue
+      SCintra 	<- result@intraSC
+      intraDF 	<- result@intraDF
+      MCintra 	<- result@intraMC
+      SCinter 	<- result@interSC
+      interDF 	<- result@interDF
+      MCinter 	<- result@interMC
+      SCtotal 	<- result@totalSC
+      totalDF 	<- result@totalDF
       
       confLevel 	<- (input$confLevel / 100)
       QF		<- qf(confLevel, interDF, intraDF)
@@ -54,7 +53,7 @@ shinyServer(function(input, output) {
 	explanation2 	<- paste("p (",round(pValue,4),") > &alpha; (",round(1-confLevel,2),").",sep="")
       }
       
-      if(getPValue(result) < (1-confLevel)) {
+      if(pValue < (1-confLevel)) {
 	scheffeResult <- scheffe(result, confLevel)
 	scheffeText <- "<h5>Scheffé's pairwise comparisons:</h5><ul>";
 	for (i in 1:length(scheffeResult)){
@@ -86,32 +85,35 @@ shinyServer(function(input, output) {
       data 	<- loadDataset()
       result 	<- owRepeatedAnova(data)
       
-      F 	<- getF(result)
-      pValue 	<- getPValue(result)
+      aF 	<- result@aF
+      apValue 	<- result@apValue
       
-      SCa	<- getSCa(result)
-      DFa	<- getDFa(result)
-      MCa	<- getMCa(result)
+      sF 	<- result@sF
+      spValue 	<- result@spValue
       
-      SCs	<- getSCs(result)
-      DFs	<- getDFs(result)
-      MCs	<- getMCs(result)
+      SCa	<- result@SCa
+      DFa	<- result@DFa
+      MCa	<- result@MCa
       
-      SCas	<- getSCas(result)
-      DFas	<- getDFas(result)
-      MCas	<- getMCas(result)      
+      SCs	<- result@SCs
+      DFs	<- result@DFs
+      MCs	<- result@MCs
       
-      SCtotal 	<- getSCtotal(result)
-      DFtotal 	<- getDFtotal(result)
+      SCas	<- result@SCas
+      DFas	<- result@DFas
+      MCas	<- result@MCas
+      
+      SCtotal 	<- result@SCtotal
+      DFtotal 	<- result@DFtotal
       
       HTML(
 	"<h4>ANOVA table for repeated measures, single factor, fully randomized experiment</h4>",
 	"<table><tr>",
 	"<th>Source of variation</th><th>Sum of squares</th><th>Degrees of freedom</th><th>Mean square</th><th>F</th>",
 	"</tr><tr>",
-	"<td>Factor (A)</td><td>",round(SCa,4),"</td><td>",round(DFa,4),"</td><td>",round(MCa,4),"<td>",round(F,4),"</td>",
+	"<td>Factor (A)</td><td>",round(SCa,4),"</td><td>",round(DFa,4),"</td><td>",round(MCa,4),"<td>",round(aF,4)," (p = ",round(apValue,4),")</td>",
 	"</tr><tr>",
-	"<td>Subject (S)</td><td>",round(SCs,4),"</td><td>",round(DFs,4),"</td><td>",round(MCs,4),"</td>",
+	"<td>Subject (S)</td><td>",round(SCs,4),"</td><td>",round(DFs,4),"</td><td>",round(MCs,4),"<td>",round(sF,4)," (p = ",round(spValue,4),")</td>",
 	"</tr><tr>",
 	"<td>Error (AxS)</td><td>",round(SCas,4),"</td><td>",round(DFas,4),"</td><td>",round(MCas,4),"</td>",
 	"</tr><tr>",
@@ -121,10 +123,21 @@ shinyServer(function(input, output) {
     }
   })
   
-  output$downloadSample2 <- downloadHandler(
-    filename = function() { "sampleData.csv" },
+  output$downloadSample <- downloadHandler(
+    filename = function() { 
+      if(input$repeatedMeasures == FALSE){
+	"sampleDataOneWay.csv" 
+      } else {
+	"sampleDataRepeated.csv" 
+      }            
+    },
+    
     content = function(file) {
-      write.csv(read.csv("data/testData.csv"), file, row.names=FALSE, quote=FALSE);
+    if(input$repeatedMeasures == FALSE){
+	write.csv(read.csv("data/testDataOneWay.csv"), file, row.names=FALSE, quote=FALSE);
+      } else {
+	write.csv(read.csv("data/testDataRepeated.csv"), file, row.names=FALSE, quote=FALSE);
+      }      
     }
   )  
 })

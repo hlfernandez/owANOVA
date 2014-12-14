@@ -36,13 +36,13 @@ shinyUI(fluidPage(
       
       tags$hr(),      
       h4("Data format"),
-      helpText("A CSV file with one column by factor"),
+      helpText("A CSV file with one column by factor and header with the factor names."),
       pre("
 	A1,A2,A3
 	1,2,3
 	1,3,4"
       ),
-      downloadButton("downloadSample2", "Download sample data")
+      downloadButton("downloadSample", "Download sample data")
      ),     
       
     mainPanel(

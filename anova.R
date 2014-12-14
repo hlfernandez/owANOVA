@@ -9,29 +9,18 @@ anovaFactor <- setClass("anovaFactor",
 
 setMethod("show", "anovaFactor",
   function(object){
-    cat("(A = ", getA(object),", A^2 = ",getASquared(object),", n = ",getN(object),")","\n");
+    cat("[Factor ",object@name, "] A =", object@a,", A^2 = ",object@aSquared,", n = ",object@n,")","\n");
   }
 )
 
-getName <- function(f){
-  attributes(f)$name
-}
-
-getA <- function(f){
-  attributes(f)$a
-}
-
-getASquared <- function(f){
-  attributes(f)$aSquared
-}
-
-getN <- function(f){
-  attributes(f)$n
-}
-
-getMean <- function(f){
-  attributes(f)$mean
-}
+anovaSubject <- setClass("anovaSubject", 
+	representation(
+		name="character",
+		a="numeric",
+		aSquared="numeric",
+		n="numeric",
+		mean="numeric"
+));
 
 owAnovaResult <- setClass("owAnovaResult", 
 	representation(
@@ -52,49 +41,6 @@ owAnovaResult <- setClass("owAnovaResult",
 		factors="list"
 )); 
 
-getF <- function(f){
-  attributes(f)$F
-}
-
-getPValue <- function(f){
-  attributes(f)$pValue
-}
-
-getIntraSC <- function(f){
-  attributes(f)$intraSC
-}
-
-getIntraMC <- function(f){
-  attributes(f)$intraMC
-}
-
-getIntraDF <- function(f){
-  attributes(f)$intraDF
-}
-
-getInterSC <- function(f){
-  attributes(f)$interSC
-}
-
-getInterMC <- function(f){
-  attributes(f)$interMC
-}
-
-getInterDF <- function(f){
-  attributes(f)$interDF
-}
-
-getTotalSC <- function(f){
-  attributes(f)$totalSC
-}
-
-getTotalDF <- function(f){
-  attributes(f)$totalDF
-}
-
-getFactors <- function(f){
-  attributes(f)$factors
-}
 
 scheffeComparison <- setClass("scheffeComparison", 
 	representation(
@@ -104,36 +50,46 @@ scheffeComparison <- setClass("scheffeComparison",
 		meanDifference="numeric"
 )); 
 
-getFactorA <- function(f){
-  attributes(f)$a
-}
+owRepeaedAnovaResult <- setClass("owRepeaedAnovaResult",
+	representation(
+		aF="numeric",
+		apValue="numeric",
+		
+		sF="numeric",
+		spValue="numeric",
+		
+		SCa="numeric",
+		DFa="numeric",
+		MCa="numeric",
+		
+		SCs="numeric",
+		DFs="numeric",
+		MCs="numeric",
 
-getFactorB <- function(f){
-  attributes(f)$b
-}
+		SCas="numeric",
+		DFas="numeric",
+		MCas="numeric",
+		
+		SCtotal="numeric",
+		DFtotal="numeric"
+));
 
-getCR <- function(f){
-  attributes(f)$CR
-}
-
-getMeanDifference <- function(f){
-  attributes(f)$meanDifference
-}
 
 scheffeResultToString <- function(object) {
-  factorA <- getFactorA(object)
-  factorB <- getFactorB(object)
-  meanDifference <- getMeanDifference(object)
-  CR <- getCR(object)
-  comparison <- " = ";
-  differences <- ""
+  factorA 		<- object@a
+  factorB 		<- object@b
+  CR 			<- object@CR
+  meanDifference 	<- object@meanDifference
+  
+  comparison 	<- " = ";
+  differences 	<- ""
   if(meanDifference > CR){
-    comparison <- " > ";
+    comparison 	<- " > ";
     differences <- "*"
   } else {
-    comparison <- " < ";
+    comparison 	<- " < ";
   }
-  paste("|mean(",getName(factorA),") - mean(",getName(factorB),")| = ","|",getMean(factorA)," - ",getMean(factorB),"| = ",round(meanDifference,4),comparison," CR (",round(CR,4),") ",differences,sep="")
+  paste("|mean(",factorA@name,") - mean(",factorB@name,")| = ","|",factorA@mean," - ",factorB@mean,"| = ",round(meanDifference,4),comparison," CR (",round(CR,4),") ",differences,sep="")
 }
 
 setMethod("show", "scheffeComparison",
@@ -164,37 +120,37 @@ computeFactors <- function(data) {
 owAnova <- function(data){  
   anovaFactors <- computeFactors(data)
 
-  T = 0
-  sumSquared = 0;
-  N = 0  
+  T 		<- 0
+  sumSquared 	<- 0;
+  N 		<- 0  
   for (i in 1:length(anovaFactors) ) {
     factor <- anovaFactors[[i]]
-    T = T + getA(factor)
-    N = N + getN(factor)
-    sumSquared = sumSquared + getASquared(factor)
+    T 		<- T + factor@a
+    N 		<- N + factor@n
+    sumSquared 	<- sumSquared + factor@aSquared
     
   }
-  mean = T/N
+  mean <- T/N
 
-  bT = T*T/N
-  bA = 0
-  bY = 0
+  bT <- T*T/N
+  bA <- 0
+  bY <- 0
   for (i in 1:length(anovaFactors) ) {
     factor <- anovaFactors[[i]]
-    bA = bA + (getA(factor)*getA(factor)/getN(factor))
-    bY = bY + getASquared(factor)
+    bA 	<- bA + (factor@a*factor@a/factor@n)
+    bY 	<- bY + factor@aSquared
   }
 
-  SCinter = bA-bT
-  SCintra = bY-bA
-  SCtotal = bY-bT
+  SCinter <- bA-bT
+  SCintra <- bY-bA
+  SCtotal <- bY-bT
 
-  interDF = length(anovaFactors) - 1
-  MCinter = SCinter / interDF
-  intraDF = N - length(anovaFactors)
-  MCintra = SCintra / intraDF
+  interDF <- length(anovaFactors) - 1
+  MCinter <- SCinter / interDF
+  intraDF <- N - length(anovaFactors)
+  MCintra <- SCintra / intraDF
 
-  F = MCinter / MCintra
+  F 		<- MCinter / MCintra
   pValue 	<- 1-pf(F, interDF, intraDF)
    
   owAnovaResult(
@@ -218,14 +174,14 @@ owAnova <- function(data){
 
 scheffe <- function(anovaResult, confLevel) {
   comparisons	<- vector()
-  anovaFactors 	<- getFactors(anovaResult)
-  intraMC 	<- getIntraMC(anovaResult)
-  interDF	<- getInterDF(anovaResult)
-  intraDF	<- getIntraDF(anovaResult)
+  anovaFactors 	<- anovaResult@factors
+  intraMC 	<- anovaResult@intraMC
+  interDF	<- anovaResult@interDF
+  intraDF	<- anovaResult@intraDF
   for (i in 1:(length(anovaFactors)-1)) {
     for (j in (i+1):length(anovaFactors)) {
-      CR 		<- sqrt(interDF*qf(confLevel, interDF, intraDF)) * sqrt(intraMC * ( (1/ getN(anovaFactors[[i]]) + (1/ getN(anovaFactors[[j]])))))
-      absMeanDiff 	<- abs(getMean(anovaFactors[[i]]) - getMean(anovaFactors[[j]]))      
+      CR 		<- sqrt(interDF*qf(confLevel, interDF, intraDF)) * sqrt(intraMC * ( (1/ anovaFactors[[i]]@n + (1/ anovaFactors[[j]]@n))))
+      absMeanDiff 	<- abs(anovaFactors[[i]]@mean - anovaFactors[[j]]@mean)      
       comparisons <- c(comparisons, scheffeComparison(
 		      a=anovaFactors[[i]],
 		      b=anovaFactors[[j]],
@@ -236,4 +192,104 @@ scheffe <- function(anovaResult, confLevel) {
     }
   }
   comparisons
+}
+
+owRepeatedAnova <- function(data){  
+
+  s = nrow(data)
+  a = ncol(data)
+  
+  anovaFactors <- vector()
+
+  for (i in 1:ncol(data) ) {
+    factor <- data[,i]
+    factor <- factor[!is.na(factor)]
+    
+    factorName		= colnames(data)[i]
+    factorSum 		= sum(factor)
+    factorSquaredSum 	= sum(factor*factor)
+    factorSize 		= length(factor)
+    factorMean 		= mean(factor)
+    
+    anovaFactors = c(anovaFactors, anovaFactor(name=factorName,a=factorSum, aSquared=factorSquaredSum, n=factorSize, mean=factorMean))
+  }
+  
+  anovaSubjects <- vector()
+
+  for (i in 1:nrow(data) ) {
+    subject <- data[i,]
+    subject <- subject[!is.na(subject)]
+    
+    subjectName		= as.character(i)
+    subjectSum 		= sum(subject)
+    subjectSquaredSum 	= sum(subject*subject)
+    subjectSize 		= length(subject)
+    subjectMean 		= mean(subject)
+    
+    anovaSubjects = c(anovaSubjects, anovaSubject(name=subjectName,a=subjectSum, aSquared=subjectSquaredSum, n=subjectSize, mean=subjectMean))
+  }
+  
+  A 	<- 0
+  AS 	<- 0
+  T	<- 0
+  for (i in 1:length(anovaFactors) ) {
+    factor <- anovaFactors[[i]]
+    A 	<- A + (factor@a*factor@a)
+    AS 	<- AS + factor@aSquared
+    T 	<- T + factor@a
+  }
+  A	<- A/s
+  T	<- (T*T)/(a*s)
+  
+  S	<- 0
+  for (i in 1:length(anovaSubjects) ) {
+    subject <- anovaSubjects[[i]]
+    S	<- S + (subject@a*subject@a)
+  }
+  S	<- S/a
+
+  
+  SCa	<- A-T
+  DFa	<- a-1
+  MCa	<- SCa / DFa
+  
+  SCs	<- S-T
+  DFs	<- s-1
+  MCs	<- SCs / DFs
+  
+  SCas	<- AS - A - S + T
+  DFas	<- a*s - a - s + 1
+  MCas	<- SCas / DFas
+  
+  SCtotal	<- AS - T
+  DFtotal	<- a*s - 1
+
+  aF = MCa / MCas
+  apValue 	<- 1-pf(aF, DFa, DFas)
+
+  sF = MCs / MCas
+  spValue 	<- 1-pf(sF, DFs, DFas)
+   
+  owRepeaedAnovaResult(
+    aF=aF,
+    apValue=apValue,
+    
+    sF=sF,
+    spValue=spValue,
+    
+    SCa=SCa,
+    DFa=DFa,
+    MCa=MCa,
+    
+    SCs=SCs,
+    DFs=DFs,
+    MCs=MCs,
+
+    SCas=SCas,
+    DFas=DFas,
+    MCas=MCas,
+    
+    SCtotal=SCtotal,
+    DFtotal=DFtotal
+  )
 }

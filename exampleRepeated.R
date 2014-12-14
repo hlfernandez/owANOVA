@@ -1,4 +1,4 @@
-source("anovaRepeated.R")
+source("anova.R")
 
 confLevel <- 0.95
 
